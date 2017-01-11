@@ -51,13 +51,13 @@ function escape_with(str, use)
             end
         else
             while i < i_next
-                write(out, hex_string(str.data[i]))
+                write(out, hex_string(Vector{UInt8}(str)[i]))
                 i += 1
             end
         end
         i = i_next
     end
-    takebuf_string(out)
+    String(take!(out))
 end
 
 escape(str) = escape_with(str, unescaped)
