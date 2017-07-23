@@ -322,7 +322,7 @@ function print(io::IO, uri::URI)
     end
 end
 
-@compat function show(io::IO, ::MIME"text/html", uri::URI)
+function show(io::IO, ::MIME"text/html", uri::URI)
     print(io, "<a href=\"")
     print(io, uri)
     print(io, "\">")
