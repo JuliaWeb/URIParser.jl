@@ -8,7 +8,7 @@ ishex(c) =  (isnum(c) || 'a' <= lowercase(c) <= 'f')
 is_host_char(c) = isalnum(c) || (c == '.') || (c == '-') || (c == '_') || (c == "~")
 
 
-immutable URI
+struct URI
     scheme::String
     host::String
     port::UInt16

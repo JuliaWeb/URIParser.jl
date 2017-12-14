@@ -1,5 +1,6 @@
 using URIParser
-using Base.Test
+using Compat
+using Compat.Test
 
 urls = ["hdfs://user:password@hdfshost:9000/root/folder/file.csv#frag",
     "https://user:password@httphost:9000/path1/path2;paramstring?q=a&p=r#frag",
