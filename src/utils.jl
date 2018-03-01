@@ -8,7 +8,7 @@
 function userinfo(uri::URI)
     Base.warn_once("Use of the format user:password is deprecated (rfc3986)")
     uinfo = uri.userinfo
-    sep = search(uinfo, ':')
+    sep = findfirst(equalto(':'), uinfo)
     l = length(uinfo)
     username = uinfo[1:(sep-1)]
     password = ((sep == l) || (sep == 0)) ? "" : uinfo[(sep+1):l]
@@ -61,7 +61,9 @@ const uses_fragment = ["hdfs", "ftp", "hdl", "http", "gopher", "news", "nntp", "
 function isvalid(uri::URI)
     scheme = uri.scheme
     isempty(scheme) && error("Can not validate relative URI")
-    if ((scheme in non_hierarchical) && (search(uri.path, '/') > 1)) ||       # path hierarchy not allowed
+    slash = findfirst(equalto('/'), uri.path)
+    hasslash = slash !== nothing && slash > 1 # For 0.6 compatibility
+    if ((scheme in non_hierarchical) && hasslash) ||                          # path hierarchy not allowed
        (!(scheme in uses_query) && !isempty(uri.query)) ||                    # query component not allowed
        (!(scheme in uses_fragment) && !isempty(uri.fragment)) ||              # fragment identifier component not allowed
        (!(scheme in uses_authority) && (!isempty(uri.host) || (0 != uri.port) || !isempty(uri.userinfo))) # authority component not allowed

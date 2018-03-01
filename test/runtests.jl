@@ -15,6 +15,7 @@ urls = ["hdfs://user:password@hdfshost:9000/root/folder/file.csv#frag",
 
 failed = 0
 for url in urls
+    global failed
     u = URI(url)
     if !(string(u) == url) || !isvalid(u)
         failed += 1

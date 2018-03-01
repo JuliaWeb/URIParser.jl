@@ -14,6 +14,12 @@ if VERSION >= v"0.7.0-DEV.2915"
     using Base.Unicode: isascii
 end
 
+if VERSION >= v"0.7.0-DEV.3526"
+    _parse(T, s, b) = Base.parse(Int, s, base=b)
+else
+    _parse(T, s, b) = Base.parse(Int, s, b)
+end
+
 include("parser.jl")
 include("esc.jl")
 include("utils.jl")

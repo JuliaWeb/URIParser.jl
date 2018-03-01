@@ -1,11 +1,17 @@
+if isdefined(Base, :isnumeric)
+    _isalnum(c) = isalpha(c) || isnumeric(c)
+else
+    const _isalnum = Base.isalnum
+end
+
 is_url_char(c) =  ((@assert UInt32(c) < 0x80); 'A' <= c <= '~' || '$' <= c <= '>' || c == '\f' || c == '\t')
 is_mark(c) = (c == '-') || (c == '_') || (c == '.') || (c == '!') || (c == '~') ||
              (c == '*') || (c == '\'') || (c == '(') || (c == ')')
-is_userinfo_char(c) = isalnum(c) || is_mark(c) || (c == '%') || (c == ';') ||
+is_userinfo_char(c) = _isalnum(c) || is_mark(c) || (c == '%') || (c == ';') ||
              (c == ':') || (c == '&') || (c == '+') || (c == '$' || c == ',')
 isnum(c) = ('0' <= c <= '9')
 ishex(c) =  (isnum(c) || 'a' <= lowercase(c) <= 'f')
-is_host_char(c) = isalnum(c) || (c == '.') || (c == '-') || (c == '_') || (c == "~")
+is_host_char(c) = _isalnum(c) || (c == '.') || (c == '-') || (c == '_') || (c == "~")
 
 
 struct URI
@@ -133,7 +139,7 @@ function parse_authority(authority,seen_at)
             error("Unexpected state $state")
         end
     end
-    (host, UInt16(port == "" ? 0 : parse(Int,port,10)), user)
+    (host, UInt16(port == "" ? 0 : _parse(Int, port, 10)), user)
 end
 
 function parse_url(url)
