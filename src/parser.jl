@@ -49,6 +49,25 @@ URI(uri::URI;
 URI( scheme, host, port, path, query, fragment, userinfo, specifies_authority)
 
 
+"""
+    URI_file(base, filespec)
+
+Construct an absolute URI to `filespec` relative to `base`.
+"""
+URI_file(base, filespec) = URI_file(base, URI("file:///$filespec"))
+function URI_file(base, filespec::URI)
+    base = join(map(URIParser.escape, split(base, Base.Filesystem.path_separator_re)), "/")
+    return URI(filespec, path = base * filespec.path)
+end
+
+"""
+    pwd(URI)
+
+Return `pwd()` as a `URI` resource.
+"""
+Base.pwd(::Type{URI}) = URI_file(pwd(), "")
+
+
 # URL parser based on the http-parser package by Joyent
 # Licensed under the BSD license
 

@@ -68,3 +68,19 @@ g = URI("google.com","/some/path")
 # Issue #2
 @test sprint(show, MIME("text/html"), URI("http://google.com")) ==
     """<a href="http://google.com/">http://google.com/</a>"""
+
+@testset "local file" begin
+    dir = URI_file("/a//b/%%c d/../e?f#g", "../../g?h/i#j/k")
+    @test dir == URI("file:///a/b/%25%25c%20d/../e%3Ff%23g/../../g?h/i#j/k")
+
+    dir = pwd(URI)
+    @test unescape(dir.path) == join(push!(split(pwd(), Base.Filesystem.path_separator_re), ""), "/")
+    @test dir.query == dir.fragment == dir.host == ""
+    @test string(dir) == "file://$(dir.path)"
+
+    __dirname = @__DIR__
+    dir = URI_file(__dirname, "")
+    @test URI(dir, path = dir.path * "test.html", query = "a", fragment = "b") ==
+        URI_file((@__DIR__), "test.html?a#b") ==
+        URI_file(__dirname, "test.html?a#b")
+end
