@@ -37,15 +37,16 @@ isequal(a::URI,b::URI) = (a.scheme == b.scheme) &&
                          (a.userinfo == b.userinfo)
 
 URI(host,path) = URI("http",host,UInt16(80),path,"","","",true)
-URI(uri::URI; scheme=nothing, host=nothing, port=nothing, path=nothing, query=nothing, fragment=nothing, userinfo=nothing, specifies_authority=nothing) =
-URI(scheme === nothing ? uri.scheme : scheme,
-    host === nothing ? uri.host : host,
-    port === nothing ? uri.port : port,
-    path === nothing ? uri.path : path,
-    query === nothing ? uri.query : query,
-    fragment === nothing ? uri.fragment : fragment,
-    userinfo === nothing ? uri.userinfo : userinfo,
-    specifies_authority === nothing ? uri.specifies_authority : specifies_authority)
+URI(uri::URI;
+    scheme=uri.scheme,
+    host=uri.host,
+    port=uri.port,
+    path=uri.path,
+    query=uri.query,
+    fragment=uri.fragment,
+    userinfo=uri.userinfo,
+    specifies_authority=uri.specifies_authority) =
+URI( scheme, host, port, path, query, fragment, userinfo, specifies_authority)
 
 
 # URL parser based on the http-parser package by Joyent
