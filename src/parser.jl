@@ -52,12 +52,24 @@ URI( scheme, host, port, path, query, fragment, userinfo, specifies_authority)
 """
     URI_file(base, filespec)
 
-Construct an absolute URI to `filespec` relative to `base`.
+Construct an absolute URI to `filespec` (a URI spec)
+relative to `base` (a file path, given as a String).
 """
 URI_file(base, filespec) = URI_file(base, URI("file:///$filespec"))
 function URI_file(base, filespec::URI)
-    base = join(map(URIParser.escape, split(base, Base.Filesystem.path_separator_re)), "/")
-    return URI(filespec, path = base * filespec.path)
+    escapeparts(base) = join(map(URIParser.escape, split(base, Base.Filesystem.path_separator_re)), "/")
+    drive, base = splitdrive(base)
+    if !isempty(drive)
+        if ismatch(r"^[A-Za-z]:$", drive)
+            drive = "/" * drive # /C:
+        elseif ismatch(r"^\\\\[^\\?.]+\\.", drive)
+            drive = escapeparts(drive[3:end]) # host.example.com/Share
+        else
+            throw(ArgumentError("malformed or unsupported drive spec `$base`")) # Translation of \\?\ or \\.\ or \\?\UNC is undefined in the URI spec
+        end
+    end
+    base = escapeparts(base) # /escape/path
+    return URI(filespec, path = drive * base * filespec.path)
 end
 
 """
