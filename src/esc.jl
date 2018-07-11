@@ -31,14 +31,14 @@ function unescape(str)
 end
 unescape_form(str) = unescape(replace(str, "+" => " "))
 
-hex_string(x) = string('%', uppercase(hex(x,2)))
+hex_string(x) = string('%', uppercase(string(x, base = 16, pad = 2)))
 
 # Escapes chars (in second string); also escapes all non-ASCII chars.
 function escape_with(str, use)
     str = String(str)
     out = IOBuffer()
     chars = Set(use)
-    i = start(str)
+    i = firstindex(str)
     e = lastindex(str)
     while i <= e
         i_next = nextind(str, i)
