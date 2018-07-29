@@ -3,13 +3,13 @@ os:
   - linux
   - osx
 julia:
-  - 0.6
+  - 0.7
   - nightly
 notifications:
   email: false
 sudo: false
-script:
-  - if [[ -a .git/shallow ]]; then git fetch --unshallow; fi
-  - julia -e 'Pkg.clone(pwd()); Pkg.test("URIParser", coverage=true)'
+#script:
+#  - if [[ -a .git/shallow ]]; then git fetch --unshallow; fi
+#  - julia -e 'Pkg.clone(pwd()); Pkg.test("URIParser", coverage=true)'
 after_success:
   - julia -e 'cd(Pkg.dir("URIParser")); Pkg.add("Coverage"); using Coverage; Codecov.submit(process_folder())'
