@@ -1,7 +1,7 @@
 const escaped_regex = r"%([0-9a-fA-F]{2})"
 
 # Escaping
-const control_array = vcat(map(UInt8, 0:_parse(Int, "1f", 16)))
+const control_array = vcat(map(UInt8, 0:parse(Int, "1f", base=16)))
 const control = String(control_array)*"\x7f"
 const space = String(" ")
 const delims = String("%<>\"")
@@ -22,7 +22,7 @@ function unescape(str)
         c = str[i]
         i += 1
         if c == '%'
-            c = _parse(UInt8, str[i:i+1], 16)
+            c = parse(UInt8, str[i:i+1], base=16)
             i += 2
         end
         push!(r, c)
@@ -31,14 +31,14 @@ function unescape(str)
 end
 unescape_form(str) = unescape(replace(str, "+" => " "))
 
-hex_string(x) = string('%', uppercase(hex(x,2)))
+hex_string(x) = string('%', uppercase(string(x, base=16, pad=2)))
 
 # Escapes chars (in second string); also escapes all non-ASCII chars.
 function escape_with(str, use)
     str = String(str)
     out = IOBuffer()
     chars = Set(use)
-    i = start(str)
+    i = firstindex(str)
     e = lastindex(str)
     while i <= e
         i_next = nextind(str, i)
