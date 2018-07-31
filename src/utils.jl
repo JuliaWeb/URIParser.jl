@@ -6,9 +6,9 @@
 # deprecated as of rfc3986.
 # See: http://tools.ietf.org/html/rfc3986#section-3.2.1
 function userinfo(uri::URI)
-    Base.warn_once("Use of the format user:password is deprecated (rfc3986)")
+    @warn("Use of the format user:password is deprecated (rfc3986)")
     uinfo = uri.userinfo
-    sep = findfirst(equalto(':'), uinfo)
+    sep = findfirst(isequal(':'), uinfo)
     l = length(uinfo)
     username = uinfo[1:(sep-1)]
     password = ((sep == l) || (sep == 0)) ? "" : uinfo[(sep+1):l]
@@ -19,7 +19,7 @@ end
 # Splits the path into components and parameters
 # See: http://tools.ietf.org/html/rfc3986#section-3.3
 function path_params(uri::URI, seps=[';',',','='])
-    elems = split(uri.path, '/', keep = false)
+    elems = split(uri.path, '/', keepempty = false)
     p = Array[]
     for elem in elems
         pp = split(elem, seps)
@@ -31,10 +31,10 @@ end
 ##
 # Splits the query into key value pairs
 function query_params(query::AbstractString)
-    elems = split(query, '&', keep = false)
+    elems = split(query, '&', keepempty = false)
     d = Dict{AbstractString, AbstractString}()
     for elem in elems
-        pp = split(elem, "=", keep = true)
+        pp = split(elem, "=", keepempty = true)
         if length(pp) == 2
             d[unescape(pp[1])] = unescape(pp[2])
         else
@@ -61,7 +61,7 @@ const uses_fragment = ["hdfs", "ftp", "hdl", "http", "gopher", "news", "nntp", "
 function isvalid(uri::URI)
     scheme = uri.scheme
     isempty(scheme) && error("Can not validate relative URI")
-    slash = findfirst(equalto('/'), uri.path)
+    slash = findfirst(isequal('/'), uri.path)
     hasslash = slash !== nothing && slash > 1 # For 0.6 compatibility
     if ((scheme in non_hierarchical) && hasslash) ||                          # path hierarchy not allowed
        (!(scheme in uses_query) && !isempty(uri.query)) ||                    # query component not allowed
