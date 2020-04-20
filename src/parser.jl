@@ -111,6 +111,20 @@ function parse_authority(authority,seen_at)
         elseif state == :http_host
             if ch == ':'
                 state = :http_host_port_start
+            elseif ch == '%'
+                pos_escape_char2 = nextind(authority, li, 2)
+                if pos_escape_char2 > ncodeunits(authority)
+                    error("Invalid escape sequence in host")
+                end
+
+                pos_escape_char1 = nextind(authority, i)
+
+                if ishex(authority[pos_escape_char1]) && ishex(authority[pos_escape_char2])
+                    li = pos_escape_char2
+                    (ch,i) = iterate(authority,li)
+                else
+                    error("Invalid escape sequence in host")
+                end
             elseif !is_host_char(ch)
                 error("Unexpected character '$ch' in host")
             end
