@@ -72,5 +72,7 @@ g = URI("google.com","/some/path")
 
 @test URI("file://wsl%24more/Ubuntu-18.04/foo/bar") == URI("file", "wsl%24more", 0, "/Ubuntu-18.04/foo/bar")
 
+@test URI("gitlens://%28deleted%29/foo/bar") == URI("gitlens", "%28deleted%29", 0, "/foo/bar")
+
 # Test that an invalid escape sequence throws an error
 @test_throws ErrorException URI("file://wsl%2more/Ubuntu-18.04/foo/bar")
