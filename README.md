@@ -2,7 +2,7 @@
 
 This Julia package provides URI parsing according to [RFC 3986](http://tools.ietf.org/html/rfc3986).
 
-**This package is deprecated**. Please open new issues in [URIs.jl](https://github.com/JuliaWeb/URIs.jl)**.
+**This package is deprecated**. Please open new issues in [URIs.jl](https://github.com/JuliaWeb/URIs.jl).
 
 [![Build Status](https://travis-ci.org/JuliaWeb/URIParser.jl.svg?branch=master)](https://travis-ci.org/JuliaWeb/URIParser.jl)
 [![codecov.io](http://codecov.io/github/JuliaWeb/URIParser.jl/coverage.svg?branch=master)](http://codecov.io/github/JuliaWeb/URIParser.jl?branch=master)
