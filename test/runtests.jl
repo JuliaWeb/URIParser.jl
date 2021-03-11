@@ -1,6 +1,5 @@
 using URIParser
-using Compat
-using Compat.Test
+using Test
 
 urls = ["hdfs://user:password@hdfshost:9000/root/folder/file.csv#frag",
     "https://user:password@httphost:9000/path1/path2;paramstring?q=a&p=r#frag",
@@ -84,3 +83,12 @@ g = URI("google.com","/some/path")
         URI_file((@__DIR__), "test.html?a#b") ==
         URI_file(__dirname, "test.html?a#b")
 end
+
+@test URI("file://wsl%24/Ubuntu-18.04/foo/bar") == URI("file", "wsl%24", 0, "/Ubuntu-18.04/foo/bar")
+
+@test URI("file://wsl%24more/Ubuntu-18.04/foo/bar") == URI("file", "wsl%24more", 0, "/Ubuntu-18.04/foo/bar")
+
+@test URI("gitlens://%28deleted%29/foo/bar") == URI("gitlens", "%28deleted%29", 0, "/foo/bar")
+
+# Test that an invalid escape sequence throws an error
+@test_throws ErrorException URI("file://wsl%2more/Ubuntu-18.04/foo/bar")

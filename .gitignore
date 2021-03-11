@@ -1,2 +1,3 @@
 *.cov
 .DS_Store
+.vscode

@@ -1,17 +1,13 @@
-if isdefined(Base, :isnumeric)
-    _isalnum(c) = isalpha(c) || isnumeric(c)
-else
-    const _isalnum = Base.isalnum
-end
+isalnum(c) = isletter(c) || isnumeric(c)
 
 is_url_char(c) =  ((@assert UInt32(c) < 0x80); 'A' <= c <= '~' || '$' <= c <= '>' || c == '\f' || c == '\t')
 is_mark(c) = (c == '-') || (c == '_') || (c == '.') || (c == '!') || (c == '~') ||
              (c == '*') || (c == '\'') || (c == '(') || (c == ')')
-is_userinfo_char(c) = _isalnum(c) || is_mark(c) || (c == '%') || (c == ';') ||
+is_userinfo_char(c) = isalnum(c) || is_mark(c) || (c == '%') || (c == ';') ||
              (c == ':') || (c == '&') || (c == '+') || (c == '$' || c == ',')
 isnum(c) = ('0' <= c <= '9')
 ishex(c) =  (isnum(c) || 'a' <= lowercase(c) <= 'f')
-is_host_char(c) = _isalnum(c) || (c == '.') || (c == '-') || (c == '_') || (c == "~")
+is_host_char(c) = isalnum(c) || (c == '.') || (c == '-') || (c == '_') || (c == "~")
 
 
 struct URI
@@ -90,10 +86,10 @@ function parse_authority(authority,seen_at)
     port=""
     user=""
     last_state = state = seen_at ? :http_userinfo_start : :http_host_start
-    i = start(authority)
+    i = firstindex(authority)
     li = s = 0
     while true
-        if done(authority,li)
+        if li > ncodeunits(authority)
             last_state = state
             state = :done
         end
@@ -118,13 +114,13 @@ function parse_authority(authority,seen_at)
             break
         end
 
-        if done(authority,i)
+        if i > ncodeunits(authority)
             li = i
             continue
         end
 
         li = i
-        (ch,i) = next(authority,i)
+        (ch,i) = iterate(authority,i)
 
         last_state = state
         if state == :http_userinfo || state == :http_userinfo_start
@@ -138,6 +134,18 @@ function parse_authority(authority,seen_at)
         elseif state == :http_host_start
             if ch == '['
                 state = :http_host_v6_start
+            elseif ch == '%'
+                pos_escape_char2 = nextind(authority, li, 2)
+                if pos_escape_char2 > ncodeunits(authority)
+                    error("Invalid escape sequence in host")
+                end
+
+                pos_escape_char1 = nextind(authority, i)
+
+                if !ishex(authority[pos_escape_char1]) || !ishex(authority[pos_escape_char2])
+                    error("Invalid escape sequence in host")
+                end
+                state = :http_host
             elseif is_host_char(ch)
                 state = :http_host
             else
@@ -146,6 +154,20 @@ function parse_authority(authority,seen_at)
         elseif state == :http_host
             if ch == ':'
                 state = :http_host_port_start
+            elseif ch == '%'
+                pos_escape_char2 = nextind(authority, li, 2)
+                if pos_escape_char2 > ncodeunits(authority)
+                    error("Invalid escape sequence in host")
+                end
+
+                pos_escape_char1 = nextind(authority, i)
+
+                if ishex(authority[pos_escape_char1]) && ishex(authority[pos_escape_char2])
+                    li = pos_escape_char2
+                    (ch,i) = iterate(authority,li)
+                else
+                    error("Invalid escape sequence in host")
+                end
             elseif !is_host_char(ch)
                 error("Unexpected character '$ch' in host")
             end
@@ -171,7 +193,7 @@ function parse_authority(authority,seen_at)
             error("Unexpected state $state")
         end
     end
-    (host, UInt16(port == "" ? 0 : _parse(Int, port, 10)), user)
+    (host, UInt16(port == "" ? 0 : parse(Int, port, base=10)), user)
 end
 
 function parse_url(url)
@@ -188,10 +210,10 @@ function parse_url(url)
     seen_at = false
     specifies_authority = false
 
-    i = start(url)
+    i = firstindex(url)
     li = s = 0
     while true
-        if done(url,li)
+        if li > ncodeunits(url)
             last_state = state
             state = :done
         end
@@ -222,13 +244,13 @@ function parse_url(url)
             break
         end
 
-        if done(url,i)
+        if i > ncodeunits(url)
             li = i
             continue
         end
 
         li = i
-        (ch,i) = next(url,i)
+        (ch,i) = iterate(url,i)
 
         if !isascii(ch)
             error("Non-ASCII characters not supported in URIs. Encode the URL and try again.")
@@ -239,7 +261,7 @@ function parse_url(url)
         if state == :req_spaces_before_url
             if ch == '/' || ch == '*'
                 state = :req_path
-            elseif isalpha(ch)
+            elseif isletter(ch)
                 state = :req_scheme
             else
                 error("Unexpected start of URL")
@@ -247,7 +269,7 @@ function parse_url(url)
         elseif state == :req_scheme
             if ch == ':'
                 state = :req_scheme_slash
-            elseif !(isalpha(ch) || isdigit(ch) || ch == '+' || ch == '-' || ch == '.')
+            elseif !(isletter(ch) || isdigit(ch) || ch == '+' || ch == '-' || ch == '.')
                 error("Unexpected character $ch after scheme")
             end
         elseif state == :req_scheme_slash
